@@ -1,4 +1,4 @@
-(async function () {
+(typeof onUiLoadedReady === 'function' ? onUiLoadedReady : typeof onUiLoaded === 'function' ? onUiLoaded : setTimeout)(async function () {
     // #region [utils]
     const log = (...args) => console.log(`[civitai]`, ...args);
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -136,4 +136,4 @@
     // clear search params
     history.replaceState({}, document.title, location.href);
     await startStatusChecks();
-})();
+}, 2000);
