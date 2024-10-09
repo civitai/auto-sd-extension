@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 from pydantic import BaseModel, Field
 
 class ResourceTypes(str, Enum):
@@ -26,7 +27,6 @@ class ImageParams(BaseModel):
     width: int = Field(default=512, title="Width", description="The width of the image to generate.")
     height: int = Field(default=512, title="Height", description="The height of the image to generate.")
     cfgScale: float = Field(default=7.5, title="Scale", description="The guidance scale for image generation.")
-    hypernetworkStrength: float = Field(default=None, title="Hypernetwork Strength", description="The strength of the hypernetwork for image generation.")
 
 
 class GenerateImageRequest(BaseModel):
@@ -34,7 +34,6 @@ class GenerateImageRequest(BaseModel):
     batchSize: int = Field(default=1, title="Batch Size", description="The number of images to generate in each batch.")
     model: str = Field(default=None, title="Model", description="The hash of the model to use when generating the images.")
     vae: str = Field(default=None, title="VAE", description="The hash of the VAE to use when generating the images.")
-    hypernetwork: str = Field(default=None, title="Hypernetwork", description="The hash of the hypernetwork to use when generating the images.")
     params: ImageParams = Field(default=ImageParams(), title="Parameters", description="The parameters to use when generating the images.")
 
 class ResourceRequest(BaseModel):
@@ -43,7 +42,10 @@ class ResourceRequest(BaseModel):
     hash: str = Field(default=None, title="Hash", description="The SHA256 hash of the resource to download.")
     url: str = Field(default=None, title="URL", description="The URL of the resource to download.", required=False)
     previewImage: str = Field(default=None, title="Preview Image", description="The URL of the preview image.", required=False)
-    addons: list[str] = Field(default=[], title="Addons", description="The addons to download with the resource.", required=False)
+
+class RoomPresence(BaseModel):
+    client: int = Field(default=None, title="Clients", description="The number of clients in the room")
+    sd: int = Field(default=None, title="Stable Diffusion Clients", description="The number of Stable Diffusion Clients in the room")
 
 class Command(BaseModel):
     id: str = Field(default=None, title="ID", description="The ID of the command.")
@@ -54,7 +56,7 @@ class CommandActivitiesList(Command):
 
 class CommandResourcesList(Command):
     type: CommandTypes = Field(default=CommandTypes.ResourcesList, title="Type", description="The type of command to execute.")
-    types: list[ResourceTypes] = Field(default=[], title="Types", description="The types of resources to list.")
+    types: List[ResourceTypes] = Field(default=[], title="Types", description="The types of resources to list.")
 
 class CommandResourcesAdd(Command):
     type: CommandTypes = Field(default=CommandTypes.ResourcesAdd, title="Type", description="The type of command to execute.")
@@ -74,6 +76,13 @@ class ResourceRemoveRequest(BaseModel):
 class CommandResourcesRemove(Command):
     type: CommandTypes = Field(default=CommandTypes.ResourcesRemove, title="Type", description="The type of command to execute.")
     resource: ResourceRemoveRequest = Field(default=[], title="Resource", description="The resources to remove.")
+
+class CommandImageTxt2Img(Command):
+    quantity: int = Field(default=1, title="Quantity", description="The number of images to generate.")
+    batchSize: int = Field(default=1, title="Batch Size", description="The number of images to generate in each batch.")
+    model: str = Field(default=None, title="Model", description="The hash of the model to use when generating the images.")
+    vae: str = Field(default=None, title="VAE", description="The hash of the VAE to use when generating the images.")
+    params: ImageParams = Field(default=ImageParams(), title="Parameters", description="The parameters to use when generating the images.")
 
 class UpgradeKeyPayload(BaseModel):
     key: str = Field(default=None, title="Key", description="The upgraded key.")
